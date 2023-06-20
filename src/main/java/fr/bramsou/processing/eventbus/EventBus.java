@@ -10,33 +10,29 @@ import java.util.*;
 
 public class EventBus {
 
-    public static EventBus initialize() {
-        return new EventBus();
+    public EventBus() {
+        this(EventBus.class);
     }
 
-    public static EventBus initialize(Class<?> loadingClass) {
-        if (loadingClass != null) {
-            try (InputStream input = loadingClass.getClassLoader().getResourceAsStream("META-INF/processing-event-bus.txt")) {
-                if (input == null) throw new IllegalArgumentException("Cannot find processing event file");
-                String id;
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
-                    id = reader.readLine();
-                }
-
-                Class<? extends EventRegistry> registryClass = Class.forName(EventGenerator.GENERATED_PACKAGE + "." + String.format(EventGenerator.GENERATED_CLASS, id))
-                        .asSubclass(EventRegistry.class);
-                EventRegistry registry = registryClass.newInstance();
-                registry.initialize();
-                EventRegistry.EVENT_DATA_LIST.addAll(registry.data());
-            } catch (IOException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-                throw new RuntimeException(e);
+    public EventBus(Class<?> loadingClass) {
+        if (EventRegistry.LOADED_CLASSES.contains(loadingClass)) return;
+        if (loadingClass == null) loadingClass = EventBus.class;
+        try (InputStream input = loadingClass.getClassLoader().getResourceAsStream("META-INF/processing-event-bus.txt")) {
+            if (input == null) throw new IllegalArgumentException("Cannot find processing event file");
+            String id;
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
+                id = reader.readLine();
             }
+
+            Class<? extends EventRegistry> registryClass = Class.forName(EventGenerator.GENERATED_PACKAGE + "." + String.format(EventGenerator.GENERATED_CLASS, id))
+                    .asSubclass(EventRegistry.class);
+            EventRegistry registry = registryClass.newInstance();
+            registry.initialize();
+            EventRegistry.EVENT_DATA_LIST.addAll(registry.data());
+        } catch (IOException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
-
-        return new EventBus();
     }
-
-    protected EventBus() {}
 
 
     private final Map<Class<?>, List<EventData>> executorMap = new HashMap<>();
