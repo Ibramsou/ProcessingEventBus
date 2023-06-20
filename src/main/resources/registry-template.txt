@@ -1,0 +1,22 @@
+package %generated_package%;
+
+import fr.bramsou.processing.eventbus.EventData;
+import fr.bramsou.processing.eventbus.EventRegistry;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class %generated_class% implements EventRegistry {
+
+    private final List<EventData> data = new ArrayList<>();
+
+    @Override
+    public void initialize() {
+        %initialize_body%
+    }
+
+    @Override
+    public List<EventData> data() {
+        return this.data;
+    }
+}
