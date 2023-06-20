@@ -2,7 +2,6 @@ package fr.bramsou.processing.eventbus.processor;
 
 import fr.bramsou.processing.eventbus.processor.file.FileType;
 import fr.bramsou.processing.eventbus.processor.file.FileWriter;
-import fr.bramsou.processing.eventbus.processor.handler.HandlerGenerator;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.RoundEnvironment;
@@ -14,7 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-public class EventGenerator {
+public class EventGenerator extends BodyGenerator {
 
     public static final String GENERATED_PACKAGE = "fr.bramsou.processing.eventbus.generated";
     public static final String GENERATED_CLASS = "GeneratedRegistry_%s";
@@ -67,7 +66,7 @@ public class EventGenerator {
     public void generate(Set<? extends TypeElement> annotations, RoundEnvironment environment) {
         if (this.generated) return;
         List<String> bodyLines = new ArrayList<>();
-        new HandlerGenerator().handle(this, annotations, environment, bodyLines);
+        this.generateBody(annotations, environment, bodyLines);
         this.write(GENERATED_PACKAGE + "." + String.format(GENERATED_CLASS, this.generateId), FileType.JAVA_SOURCE, writer -> {
             int count = 0;
             for (String line : this.template) {
@@ -91,21 +90,5 @@ public class EventGenerator {
         } catch (IOException e) {
             throw new RuntimeException("Cannot write file at path: " + path, e);
         }
-    }
-
-    public Filer getFiler() {
-        return filer;
-    }
-
-    public List<String> getTemplate() {
-        return template;
-    }
-
-    public int getBodyIndex() {
-        return bodyIndex;
-    }
-
-    public String getGenerateId() {
-        return generateId;
     }
 }

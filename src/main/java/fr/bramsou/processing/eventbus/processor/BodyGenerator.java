@@ -1,18 +1,16 @@
-package fr.bramsou.processing.eventbus.processor.handler;
+package fr.bramsou.processing.eventbus.processor;
 
 import fr.bramsou.processing.eventbus.EventPriority;
 import fr.bramsou.processing.eventbus.annotation.Subscribe;
-import fr.bramsou.processing.eventbus.processor.EventGenerator;
-import fr.bramsou.processing.eventbus.processor.GeneratorInterface;
 
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.*;
 import java.util.List;
 import java.util.Set;
 
-public class HandlerGenerator implements GeneratorInterface {
-    @Override
-    public void handle(EventGenerator generator, Set<? extends TypeElement> annotations, RoundEnvironment environment, List<String> lines) {
+public abstract class BodyGenerator {
+
+    protected final void generateBody(Set<? extends TypeElement> annotations, RoundEnvironment environment, List<String> lines) {
         annotations.forEach(annotation -> environment.getElementsAnnotatedWith(annotation).forEach(element -> {
             String handlerClassName = element.asType().toString();
             element.getEnclosedElements().stream().filter(internalElement -> internalElement.getKind() == ElementKind.METHOD).forEach(method -> {
@@ -26,7 +24,7 @@ public class HandlerGenerator implements GeneratorInterface {
                 }
                 String eventClass = parameters.get(0).asType().toString();
                 String methodName = method.getSimpleName().toString();
-                new SubscribeGenerator(handlerClassName, methodName, eventClass, priority).handle(generator, annotations, environment, lines);
+                this.generateData(lines, handlerClassName, eventClass, methodName, priority);
             });
             for (Element internalElement : element.getEnclosedElements()) {
                 if (internalElement.getKind() == ElementKind.METHOD) {
@@ -35,5 +33,17 @@ public class HandlerGenerator implements GeneratorInterface {
                 }
             }
         }));
+    }
+
+    private void generateData(List<String> lines, String handlerClass, String eventClass, String method, EventPriority priority) {
+        lines.add(String.format(
+                "this.data.add(new EventData(%s.class, %s.class, %s, (handler, event) -> ((%s) handler).%s((%s) event)));",
+                handlerClass,
+                eventClass,
+                priority.getClass().getName() + "." + priority.name(),
+                handlerClass,
+                method,
+                eventClass
+        ));
     }
 }

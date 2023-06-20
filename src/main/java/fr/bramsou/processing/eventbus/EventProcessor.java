@@ -12,7 +12,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 @AutoService(Processor.class)
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class EventProcessor extends AbstractProcessor {
     private EventGenerator generator;
 
@@ -22,13 +21,18 @@ public class EventProcessor extends AbstractProcessor {
     }
 
     @Override
+    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        generator.generate(annotations, roundEnv);
+        return true;
+    }
+
+    @Override
     public Set<String> getSupportedAnnotationTypes() {
         return new HashSet<>(Collections.singleton(Handler.class.getCanonicalName()));
     }
 
     @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        generator.generate(annotations, roundEnv);
-        return true;
+    public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latestSupported();
     }
 }
