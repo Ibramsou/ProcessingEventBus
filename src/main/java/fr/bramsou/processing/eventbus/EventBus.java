@@ -10,10 +10,18 @@ import java.util.*;
 
 public class EventBus {
 
+    /**
+     * Create an Event bus
+     */
     public EventBus() {
         this(EventBus.class);
     }
 
+    /**
+     * Creat an event bus
+     *
+     * @param loadingClass Represents the class using the class loader containing your generated event files
+     */
     public EventBus(Class<?> loadingClass) {
         if (EventRegistry.LOADED_CLASSES.contains(loadingClass)) return;
         if (loadingClass == null) loadingClass = EventBus.class;
