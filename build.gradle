@@ -1,9 +1,11 @@
 plugins {
     id 'java'
+    id 'maven-publish'
+    id 'signing'
 }
 
-group = 'fr.bramsou.processing.event-bus'
-version = '1.0-SNAPSHOT'
+group = 'fr.bramsou.processing-event-bus'
+version = '1.0.0'
 
 repositories {
     mavenCentral()
@@ -12,4 +14,63 @@ repositories {
 dependencies {
     annotationProcessor 'com.google.auto.service:auto-service:1.0.1'
     compileOnly 'com.google.auto.service:auto-service:1.0.1'
+}
+
+jar {
+    archiveBaseName = 'processing-event-bus'
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = 'io.github.ibramsou'
+            artifactId = 'processing-event-bus'
+            version = project.version
+            from components.java
+
+            pom {
+                name = 'ProcessingEventBus'
+                description = 'Processing Event Bus is an event bus API using annotation processor'
+                url = 'https://github.com/Ibramsou/ProcessingEventBus'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'Bramsou'
+                        name = 'Ibrahim'
+                        email = 'braimsou@gmail.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git:github.com/Ibramsou/ProcessingEventBus.git'
+                    developerConnection = 'scm:git:ssh://github.com:Ibramsou/ProcessingEventBus.git'
+                    url = 'https://github.com/Ibramsou/ProcessingEventBus'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "OSSRH"
+            url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2"
+            credentials {
+                username sonatypeUsername
+                password sonatypePassword
+            }
+        }
+    }
+}
+
+
+signing {
+    sign publishing.publications.mavenJava
 }
